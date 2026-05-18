@@ -1,7 +1,7 @@
 import sqlite3
 #создаёт базу данных, если таковой не имеется
 def bd_create():
-    with sqlite3.connect('src/data.db') as conn:
+    with sqlite3.connect('../src/data.db') as conn:
         cursor = conn.cursor()
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
@@ -23,14 +23,14 @@ def bd_create():
 
 #проверка существования пользователя
 def name_exists(name):
-    with sqlite3.connect('src/data.db') as conn:
+    with sqlite3.connect('../src/data.db') as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT 1 FROM users WHERE name = ? LIMIT 1", (name,))
         return cursor.fetchone() is not None
 
 #вход или регистрация нового пользователя. на выходе даёт ID пользователя
 def signin(name):
-    with sqlite3.connect('src/data.db') as conn:
+    with sqlite3.connect('../src/data.db') as conn:
         cursor = conn.cursor()
         if not name_exists(name):
             cursor.execute("""
@@ -46,7 +46,7 @@ def signin(name):
 
 #даёт массив с данными первой сотни рекордсменов
 def records():
-    with sqlite3.connect('src/data.db') as conn:
+    with sqlite3.connect('../src/data.db') as conn:
         cursor = conn.cursor()
         cursor.execute("""
             SELECT name, res, date FROM users 
@@ -57,7 +57,7 @@ def records():
         return rows
 #даёт личную историю игр
 def history(id):
-    with sqlite3.connect('src/data.db') as conn:
+    with sqlite3.connect('../src/data.db') as conn:
         cursor = conn.execute("""
             SELECT res, date 
             FROM history
@@ -70,7 +70,7 @@ def history(id):
 
 #загружает в таблицу новые данные по окончанию игры
 def res(res, id):
-    with sqlite3.connect('src/data.db') as conn:
+    with sqlite3.connect('../src/data.db') as conn:
         cursor = conn.cursor()
         cursor.execute("""
                         INSERT INTO history (uid, res)
@@ -78,7 +78,7 @@ def res(res, id):
                     """, (id, res))
         old = cursor.execute("""
                     SELECT res FROM users WHERE id = ?
-                """, (name,))
+                """, (id,))
         row = old.fetchone()
         if row[0] < res:
             cursor.execute("""
