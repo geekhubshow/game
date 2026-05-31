@@ -20,7 +20,7 @@ if not file_path.is_file():
 
 pygame.init()
 
-FONT = pygame.font.Font(None, 32)
+FONT = pygame.font.Font(None, 30)
 SMALL_FONT = pygame.font.Font(None, 26)
 
 # Настройки основного экрана
@@ -43,6 +43,7 @@ pygame.draw.rect(auth_surface, colors.MAIN_COLOR, auth_surface.get_rect())
 text_surface = FONT.render("Форма входа", True, colors.TEXT_COLOR)
 auth_surface.blit(text_surface, ((auth_rect.width-text_surface.get_width())/2, PADDING))
 
+# Использую эти же поля в регистрации
 login_text_surface = SMALL_FONT.render("Логин", True, colors.TEXT_COLOR)
 password_text_surface = SMALL_FONT.render("Пароль", True, colors.TEXT_COLOR)
 
@@ -58,13 +59,44 @@ def on_login():
 
 def change_page(page_name):
     global page
+    print(f"Changing page from {page} to {page_name}")  # Отладочный вывод
     page = page_name
 
 sing_in_button = button.Button("Войти", 50, 120, on_login)
-sing_in_button.create_rect(270, 120+input.INPUT_HEIGHT*2)
-
 registration_button = button.Button("У меня нет аккаунта", 50, 200, callback=lambda: change_page("Registration"))
-registration_button.create_rect(50, 120+input.INPUT_HEIGHT*2)
+
+sing_in_button.create_rect(270, 120 + input.INPUT_HEIGHT * 2)
+registration_button.create_rect(50, 120 + input.INPUT_HEIGHT * 2)
+# Конец блока
+# Блок с формой регистрации
+
+reg_width = 480
+reg_height = 300
+
+reg_rect = pygame.Rect((WINDOW_WIDTH-reg_width)/2, (WINDOW_HEIGHT-reg_height-30)/2, reg_width, reg_height)
+reg_surface = pygame.Surface((reg_rect.width, reg_rect.height))
+pygame.draw.rect(reg_surface, colors.MAIN_COLOR, reg_surface.get_rect())
+
+reg_text_surface = FONT.render("Форма регистрации", True, colors.TEXT_COLOR)
+reg_surface.blit(reg_text_surface, ((reg_rect.width-reg_text_surface.get_width())/2, PADDING))
+
+repassword_text_surface = SMALL_FONT.render("Повтор пароля", True, colors.TEXT_COLOR)
+
+reg_surface.blit(login_text_surface, (PADDING, 85))
+reg_surface.blit(password_text_surface, (PADDING, input.INPUT_HEIGHT+105))
+reg_surface.blit(repassword_text_surface, (PADDING, input.INPUT_HEIGHT*2+125))
+
+repassword_input = input.Input(True)
+
+def on_reg_login():
+    if password_input.value == repassword_input.value and len(login_input.value)>4:
+        change_page("Game")
+
+registration_in_button = button.Button("Зарегистрироваться", 50, 200, on_reg_login)
+back_button = button.Button("Назад", 50, 120, callback=lambda: change_page("Auth"))
+
+registration_in_button.create_rect(230, 140 + input.INPUT_HEIGHT * 3)
+back_button.create_rect(50, 140 + input.INPUT_HEIGHT * 3)
 
 # Конец блока
 
@@ -78,10 +110,22 @@ while run:
             run = False
 
         if page == "Auth":
+
             login_input.handle_event(e, (auth_rect.x, auth_rect.y))
             password_input.handle_event(e, (auth_rect.x, auth_rect.y))
+
             sing_in_button.handle_event(e,(auth_rect.x, auth_rect.y))
             registration_button.handle_event(e,(auth_rect.x, auth_rect.y))
+
+        elif page == "Registration":
+
+
+            login_input.handle_event(e, (reg_rect.x, reg_rect.y))
+            password_input.handle_event(e, (reg_rect.x, reg_rect.y))
+            repassword_input.handle_event(e, (reg_rect.x, reg_rect.y))
+
+            registration_in_button.handle_event(e,(reg_rect.x, reg_rect.y))
+            back_button.handle_event(e,(reg_rect.x, reg_rect.y))
 
     # Отрисовка блока входа
     if page == "Auth":
@@ -94,11 +138,20 @@ while run:
         sing_in_button.draw_button(auth_surface)
         registration_button.draw_button(auth_surface)
 
+    elif page == "Registration":
+        screen.fill(colors.SECONDARY_COLOR)
+        screen.blit(reg_surface, reg_rect.topleft)
+
+        login_input.draw_input(reg_surface, 150,80)
+        password_input.draw_input(reg_surface, 150,100+input.INPUT_HEIGHT)
+        repassword_input.draw_input(reg_surface, 150,120+input.INPUT_HEIGHT*2)
+
+        registration_in_button.draw_button(reg_surface)
+        back_button.draw_button(reg_surface)
+
     elif page == "Game":
         screen.fill(colors.MAIN_COLOR)
 
-    elif page == "Registration":
-        screen.fill(colors.MAIN_COLOR)
 
     pygame.display.flip()
 
