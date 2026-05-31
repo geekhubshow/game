@@ -26,6 +26,7 @@ def bd_create():
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         uid INTEGER NOT NULL,
                         offer  TEXT NOT NULL
+                        date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
         ''')
         cursor.execute('''
@@ -33,6 +34,7 @@ def bd_create():
                  id INTEGER PRIMARY KEY AUTOINCREMENT,
                  uid INTEGER NOT NULL,
                  protocol  TEXT NOT NULL
+                 date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
          ''')
 
