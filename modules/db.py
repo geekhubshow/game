@@ -157,7 +157,7 @@ def offers():
     with sqlite3.connect('../src/data.db') as conn:
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT uid, offer FROM offers 
+            SELECT uid, offer,date FROM offers 
         """)
         rows = cursor.fetchall()
         return rows
@@ -178,7 +178,7 @@ def protocols():
     with sqlite3.connect('../src/data.db') as conn:
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT uid, protocol FROM protocol
+            SELECT uid, protocol, date FROM protocol
         """)
         rows = cursor.fetchall()
         return rows
@@ -193,6 +193,15 @@ def ban(id):
             DELETE FROM users
             WHERE id=? 
         """, (id,))
+        cursor.execute("""
+                    DELETE FROM history
+                    WHERE uid=? 
+                """, (id,))
+        if admin_exists(id):
+            cursor.execute("""
+                                DELETE FROM admins
+                                WHERE uid=? 
+                            """, (id,))
 
 #Удаление пользователя из админов
 def demotion(id, admin_id):
