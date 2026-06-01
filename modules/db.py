@@ -63,6 +63,7 @@ def admin_exists(id):
 #вход или регистрация нового пользователя. на выходе даёт ID пользователя
 def signin(name, pw):
     error = "Пароль введён не верно"
+    role = False
     with sqlite3.connect('../src/data.db') as conn:
         cursor = conn.cursor()
         if name_exists(name):
@@ -76,7 +77,8 @@ def signin(name, pw):
                               FROM users
                               WHERE name = ?
                           """, (pw,)).fetchone()
-            if pw == real_pw: return id
+            if admin_exists(id): role = True
+            if pw == real_pw: return id, role
             else: return error
 
 def signup(name,pw):
@@ -94,6 +96,11 @@ def signup(name,pw):
                                     FROM users
                                     WHERE name = ?
                                 """, (name,)).fetchone()
+            if id == 1:
+                cursor.execute("""
+                                INSERT INTO admin (uid)
+                                        VALUES (?)
+                                """, (id,))
             return id
 
 #даёт массив с данными первой сотни рекордсменов
@@ -188,20 +195,22 @@ def ban(id):
         """, (id,))
 
 #Удаление пользователя из админов
-def demotion(id):
+def demotion(id, admin_id):
     with sqlite3.connect('../src/data.db') as conn:
         cursor = conn.cursor()
-        cursor.execute("""
-            DELETE FROM admins
-            WHERE id=? 
-        """, (id,))
+        if admin_id == 1:
+            cursor.execute("""
+                DELETE FROM admins
+                WHERE id=? 
+            """, (id,))
 
 #Повышение пользователя до уровня админа
-def promotion(id):
+def promotion(id, admin_id):
     with sqlite3.connect('../src/data.db') as conn:
         cursor = conn.cursor()
-        if not admin_exists(id):
-            cursor.execute("""
-            INSERT INTO admin (uid)
-                    VALUES (?)
-            """, (id,))
+        if admin_id == 1:
+            if not admin_exists(id):
+                cursor.execute("""
+                INSERT INTO admin (uid)
+                        VALUES (?)
+                """, (id,))
