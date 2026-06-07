@@ -4,6 +4,7 @@ import constants.colors as colors
 import modules.input as input
 import modules.button as button
 from pathlib import Path
+from modules.game import DinoRunGame
 
 # Константы
 WINDOW_HEIGHT = 540
@@ -100,6 +101,9 @@ back_button.create_rect(50, 140 + input.INPUT_HEIGHT * 3)
 
 # Конец блока
 
+game = DinoRunGame(x=0, y=0, width=WINDOW_WIDTH-300, height=WINDOW_HEIGHT-100)
+clock = pygame.time.Clock()
+
 test_login = "1234"
 test_password = "4321q"
 
@@ -119,13 +123,15 @@ while run:
 
         elif page == "Registration":
 
-
             login_input.handle_event(e, (reg_rect.x, reg_rect.y))
             password_input.handle_event(e, (reg_rect.x, reg_rect.y))
             repassword_input.handle_event(e, (reg_rect.x, reg_rect.y))
 
             registration_in_button.handle_event(e,(reg_rect.x, reg_rect.y))
             back_button.handle_event(e,(reg_rect.x, reg_rect.y))
+
+        elif page == "Game":
+            game.handle_event(e)
 
     # Отрисовка блока входа
     if page == "Auth":
@@ -151,8 +157,11 @@ while run:
 
     elif page == "Game":
         screen.fill(colors.MAIN_COLOR)
-
+        game.update()
+        game.draw(screen)
+        clock.tick(60)
 
     pygame.display.flip()
+
 
 pygame.quit()
