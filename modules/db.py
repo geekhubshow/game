@@ -1,19 +1,17 @@
 import sqlite3
+
+FOLDER_PATH = "src/data.db"
 #создаёт базу данных, если таковой не имеется
 def bd_create():
-    with sqlite3.connect('../src/data.db') as conn:
+    with sqlite3.connect(FOLDER_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute('''
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 res INTEGER DEFAULT 0,
-<<<<<<< HEAD
-                date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-=======
                 date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 pw TEXT NOT NULL
->>>>>>> origin/main
             )
         ''')
 
@@ -25,8 +23,6 @@ def bd_create():
                 date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
-<<<<<<< HEAD
-=======
         cursor.execute('''
                     CREATE TABLE IF NOT EXISTS offers (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,25 +47,17 @@ def bd_create():
                     )
                  ''')
 
->>>>>>> origin/main
 
 #проверка существования пользователя
 def name_exists(name):
-    with sqlite3.connect('../src/data.db') as conn:
+    with sqlite3.connect(FOLDER_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT 1 FROM users WHERE name = ? LIMIT 1", (name,))
         return cursor.fetchone() is not None
 
-<<<<<<< HEAD
-#вход или регистрация нового пользователя. на выходе даёт ID пользователя
-def signin(name):
-    with sqlite3.connect('../src/data.db') as conn:
-        cursor = conn.cursor()
-        if not name_exists(name):
-=======
 #проверка существования админа
 def admin_exists(id):
-    with sqlite3.connect('../src/data.db') as conn:
+    with sqlite3.connect(FOLDER_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT 1 FROM admins WHERE uid = ? LIMIT 1", (id,))
         return cursor.fetchone() is not None
@@ -78,7 +66,7 @@ def admin_exists(id):
 def signin(name, pw):
     error = "Пароль введён не верно"
     role = False
-    with sqlite3.connect('../src/data.db') as conn:
+    with sqlite3.connect(FOLDER_PATH) as conn:
         cursor = conn.cursor()
         if name_exists(name):
             id = cursor.execute("""
@@ -97,23 +85,14 @@ def signin(name, pw):
 
 def signup(name,pw):
     error = "Такое имя уже существует"
-    with sqlite3.connect('../src/data.db') as conn:
+    with sqlite3.connect(FOLDER_PATH) as conn:
         cursor = conn.cursor()
         if name_exists(name): return error
         else:
->>>>>>> origin/main
             cursor.execute("""
                 INSERT INTO users (name)
                 VALUES (?)
             """, (name,))
-<<<<<<< HEAD
-        id = cursor.execute("""
-                    SELECT id
-                    FROM users
-                    WHERE name = ?
-                """, (name,)).fetchone()
-    return id
-=======
             id = cursor.execute("""
                                     SELECT id
                                     FROM users
@@ -125,11 +104,10 @@ def signup(name,pw):
                                         VALUES (?)
                                 """, (id,))
             return id
->>>>>>> origin/main
 
 #даёт массив с данными первой сотни рекордсменов
 def records():
-    with sqlite3.connect('../src/data.db') as conn:
+    with sqlite3.connect(FOLDER_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("""
             SELECT name, res, date FROM users 
@@ -140,7 +118,7 @@ def records():
         return rows
 #даёт личную историю игр
 def history(id):
-    with sqlite3.connect('../src/data.db') as conn:
+    with sqlite3.connect(FOLDER_PATH) as conn:
         cursor = conn.execute("""
             SELECT res, date 
             FROM history
@@ -152,27 +130,24 @@ def history(id):
         return rows
 
 #загружает в таблицу новые данные по окончанию игры
-def res(res, id):
-    with sqlite3.connect('../src/data.db') as conn:
+def res(result, id_user):
+    with sqlite3.connect(FOLDER_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("""
                         INSERT INTO history (uid, res)
                         VALUES (?,?)
-                    """, (id, res))
+                    """, (id_user, result))
         old = cursor.execute("""
                     SELECT res FROM users WHERE id = ?
-                """, (id,))
+                """, (id_user,))
         row = old.fetchone()
-        if row[0] < res:
+        if row[0] < result:
             cursor.execute("""
                                 UPDATE users SET res = ? WHERE id = ?
-<<<<<<< HEAD
-                            """, (res, id))
-=======
-                            """, (res, id,))
+                            """, (result, id_user,))
 #загружает в таблицу предлоежения пользователей
 def offer(id, offer):
-    with sqlite3.connect('../src/data.db') as conn:
+    with sqlite3.connect(FOLDER_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("""
                                 INSERT INTO offers (uid, offer)
@@ -181,7 +156,7 @@ def offer(id, offer):
 
 #даёт массив с предложения пользователей
 def offers():
-    with sqlite3.connect('../src/data.db') as conn:
+    with sqlite3.connect(FOLDER_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("""
             SELECT uid, offer,date FROM offers 
@@ -192,7 +167,7 @@ def offers():
 
 # загружает в таблицу действия администраторов
 def protocoling(id, protocol):
-    with sqlite3.connect('../src/data.db') as conn:
+    with sqlite3.connect(FOLDER_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("""
                                 INSERT INTO protocols (uid, protocol)
@@ -202,7 +177,7 @@ def protocoling(id, protocol):
 
 # даёт массив с действиями администраторов
 def protocols():
-    with sqlite3.connect('../src/data.db') as conn:
+    with sqlite3.connect(FOLDER_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("""
             SELECT uid, protocol, date FROM protocol
@@ -214,7 +189,7 @@ def protocols():
 
 #Удаление пользователя. Кнопка удалить может быть как у админа, так и у обычного пользователя. Админ может удалить всех. Обычный пользователь только себя
 def ban(id):
-    with sqlite3.connect('../src/data.db') as conn:
+    with sqlite3.connect(FOLDER_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("""
             DELETE FROM users
@@ -232,7 +207,7 @@ def ban(id):
 
 #Удаление пользователя из админов
 def demotion(id, admin_id):
-    with sqlite3.connect('../src/data.db') as conn:
+    with sqlite3.connect(FOLDER_PATH) as conn:
         cursor = conn.cursor()
         if admin_id == 1:
             cursor.execute("""
@@ -242,7 +217,7 @@ def demotion(id, admin_id):
 
 #Повышение пользователя до уровня админа
 def promotion(id, admin_id):
-    with sqlite3.connect('../src/data.db') as conn:
+    with sqlite3.connect(FOLDER_PATH) as conn:
         cursor = conn.cursor()
         if admin_id == 1:
             if not admin_exists(id):
@@ -250,4 +225,3 @@ def promotion(id, admin_id):
                 INSERT INTO admin (uid)
                         VALUES (?)
                 """, (id,))
->>>>>>> origin/main

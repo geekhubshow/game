@@ -5,6 +5,7 @@ import modules.input as input
 import modules.button as button
 from pathlib import Path
 from modules.game import DinoRunGame
+import modules.scroll as scroll
 
 # Константы
 WINDOW_HEIGHT = 540
@@ -31,6 +32,8 @@ screen.fill(colors.MAIN_COLOR)
 
 run = True
 page = "Auth"
+scroll_name = "Top100"
+id_user = -1
 # Конец настроек
 
 # Блок с формой входа
@@ -60,7 +63,6 @@ def on_login():
 
 def change_page(page_name):
     global page
-    print(f"Changing page from {page} to {page_name}")  # Отладочный вывод
     page = page_name
 
 sing_in_button = button.Button("Войти", 50, 120, on_login)
@@ -91,7 +93,16 @@ repassword_input = input.Input(True)
 
 def on_reg_login():
     if password_input.value == repassword_input.value and len(login_input.value)>4:
-        change_page("Game")
+        id_reg = -1
+        try:
+            id_reg = db.signup(login_input.value, password_input.value)
+        except []:
+            print("error")
+        finally:
+            if id_reg != -1:
+                global id_user
+                id_user = id_reg
+                change_page("Game")
 
 registration_in_button = button.Button("Зарегистрироваться", 50, 200, on_reg_login)
 back_button = button.Button("Назад", 50, 120, callback=lambda: change_page("Auth"))
@@ -101,8 +112,32 @@ back_button.create_rect(50, 140 + input.INPUT_HEIGHT * 3)
 
 # Конец блока
 
-game = DinoRunGame(x=0, y=0, width=WINDOW_WIDTH-300, height=WINDOW_HEIGHT-100)
+# Блок с игрой
+game = DinoRunGame(id, x=PADDING, y=PADDING, width=WINDOW_WIDTH-300, height=WINDOW_HEIGHT-100)
 clock = pygame.time.Clock()
+# Конец блока
+
+# Зона с рейтингом
+def change_scroll(name):
+    global scroll_name
+    scroll_name = name
+
+top100_button = button.Button("Топ 100", 50, 100,callback=lambda: change_scroll("Top100"))
+myTop_button = button.Button("Мой топ", 50, 100,callback=lambda: change_scroll("myTop"))
+
+top100_button.create_rect(WINDOW_WIDTH-300+PADDING, PADDING)
+myTop_button.create_rect(WINDOW_WIDTH-300+PADDING + 110, PADDING)
+
+top100_rect = pygame.Rect(WINDOW_WIDTH-300+PADDING, PADDING+60, 300-PADDING*2,WINDOW_HEIGHT-160)
+top100_surface = pygame.Surface((top100_rect.width, top100_rect.height))
+
+top100_items = []
+top100_data = db.records()
+
+for index, item in enumerate(top100_data):
+    top100_items.append(f"{index+1}: {item[0]} - {item[1]} очков" )
+
+top100_scroll = scroll.Scroll(top100_items)
 
 test_login = "1234"
 test_password = "4321q"
@@ -133,6 +168,12 @@ while run:
         elif page == "Game":
             game.handle_event(e)
 
+
+            if scroll_name == "Top100":
+                top100_scroll.handle_event(e)
+            elif scroll_name == "myTop":
+                print(123)
+
     # Отрисовка блока входа
     if page == "Auth":
         screen.fill(colors.SECONDARY_COLOR)
@@ -157,6 +198,13 @@ while run:
 
     elif page == "Game":
         screen.fill(colors.MAIN_COLOR)
+        screen.blit(top100_surface, top100_rect.topleft)
+
+        top100_button.draw_button(screen)
+        myTop_button.draw_button(screen)
+
+        top100_scroll.draw_scroll(top100_surface, 0, 0)
+
         game.update()
         game.draw(screen)
         clock.tick(60)

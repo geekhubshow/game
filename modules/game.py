@@ -1,5 +1,6 @@
 import pygame
 import random
+import modules.db as db
 
 # Константы
 WIDTH = 800
@@ -41,7 +42,7 @@ class Dino:
 
 
 class DinoRunGame:
-    def __init__(self, x=0, y=0, width=WIDTH, height=HEIGHT):
+    def __init__(self, id_user, x=0, y=0, width=WIDTH, height=HEIGHT):
         self.x = x
         self.y = y
         self.width = width
@@ -70,6 +71,8 @@ class DinoRunGame:
         self.BLACK = (0, 0, 0)
         self.GRAY = (100, 100, 100)
         self.DARK = (50, 50, 50)
+
+        self.id_user = id_user
 
     def load_best_score(self):
         try:
@@ -157,10 +160,7 @@ class DinoRunGame:
                 cactus_rect = pygame.Rect(cactus['x'], cactus['y'], cactus['w'], cactus['h'])
                 if dino_rect.colliderect(cactus_rect):
                     self.game_over = True
-                    if self.score > self.best:
-                        self.best = self.score
-                        self.save_best_score(self.best)
-                    break
+                    db.res(self.score, self.id_user)
 
     def draw(self, surface):
         # Создаем временную поверхность для игры
